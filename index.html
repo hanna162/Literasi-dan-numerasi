@@ -1,0 +1,118 @@
+```html
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Start Kids Academy</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback } = React;
+        const { Play, Star, BookOpen, Hash, ArrowLeft, Check, Volume2, Home, Award, ChevronRight, ChevronLeft } = lucide;
+
+        // --- DATA ---
+        const dataAbjad = [
+            { huruf: 'a', contoh: 'ayam', emoji: '🐔' }, { huruf: 'b', contoh: 'buku', emoji: '📚' },
+            { huruf: 'c', contoh: 'cawan', emoji: '☕' }, { huruf: 'd', contoh: 'dadu', emoji: '🎲' },
+            { huruf: 'e', contoh: 'epal', emoji: '🍎' }, { huruf: 'f', contoh: 'feri', emoji: '⛴️' },
+            { huruf: 'g', contoh: 'gajah', emoji: '🐘' }, { huruf: 'h', contoh: 'hujan', emoji: '🌧️' },
+            { huruf: 'i', contoh: 'ikan', emoji: '🐟' }, { huruf: 'j', contoh: 'jam', emoji: '⌚' },
+            { huruf: 'k', contoh: 'kucing', emoji: '🐱' }, { huruf: 'l', contoh: 'lembu', emoji: '🐄' },
+            { huruf: 'm', contoh: 'mata', emoji: '👁️' }, { huruf: 'n', contoh: 'nasi', emoji: '🍚' },
+            { huruf: 'o', contoh: 'oren', emoji: '🍊' }, { huruf: 'p', contoh: 'pokok', emoji: '🌳' },
+            { huruf: 'q', contoh: 'quran', emoji: '📖' }, { huruf: 'r', contoh: 'roti', emoji: '🍞' },
+            { huruf: 's', contoh: 'susu', emoji: '🥛' }, { huruf: 't', contoh: 'topi', emoji: '🧢' },
+            { huruf: 'u', contoh: 'ular', emoji: '🐍' }, { huruf: 'v', contoh: 'van', emoji: '🚐' },
+            { huruf: 'w', contoh: 'wau', emoji: '🪁' }, { huruf: 'x', contoh: 'x-ray', emoji: '🦴' },
+            { huruf: 'y', contoh: 'yoyo', emoji: '🪀' }, { huruf: 'z', contoh: 'zirafah', emoji: '🦒' }
+        ];
+
+        const playAudio = (text) => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'ms-MY';
+                u.rate = 0.8;
+                window.speechSynthesis.speak(u);
+            }
+        };
+
+        function App() {
+            const [view, setView] = useState('home');
+            const [stars, setStars] = useState(0);
+
+            return (
+                <div className="min-h-screen bg-gradient-to-b from-blue-50 to-purple-50 p-4">
+                    <header className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-lg mb-6">
+                        <h1 className="text-2xl font-black text-blue-600">Smart Start</h1>
+                        <div className="bg-yellow-400 text-white font-bold px-4 py-1 rounded-full flex items-center gap-2">
+                            <Star className="fill-white" /> {stars}
+                        </div>
+                    </header>
+
+                    {view === 'home' && (
+                        <div className="text-center space-y-6">
+                            <h2 className="text-4xl font-bold">Mari Belajar!</h2>
+                            <div className="grid grid-cols-1 gap-4 max-w-sm mx-auto">
+                                <button onClick={() => setView('abjad')} className="bg-rose-500 text-white p-6 rounded-2xl text-2xl font-bold">Tahap 1: ABC</button>
+                                <button onClick={() => setView('suku')} className="bg-orange-500 text-white p-6 rounded-2xl text-2xl font-bold">Tahap 2: Suku Kata</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {view === 'abjad' && <AbjadModule onBack={() => setView('home')} onStar={() => setStars(s => s + 1)} />}
+                    {view === 'suku' && <SukuModule onBack={() => setView('home')} onStar={() => setStars(s => s + 1)} />}
+                </div>
+            );
+        }
+
+        function AbjadModule({ onBack, onStar }) {
+            const [i, setI] = useState(0);
+            const item = dataAbjad[i];
+            const speak = () => { playAudio(`${item.huruf}, ${item.contoh}`); onStar(); };
+
+            return (
+                <div className="flex flex-col items-center gap-6">
+                    <button onClick={onBack} className="self-start"><ArrowLeft /></button>
+                    <div onClick={speak} className="bg-white p-10 rounded-3xl shadow-xl text-center w-full max-w-xs">
+                        <div className="text-9xl font-black text-rose-500">{item.huruf.toUpperCase()}</div>
+                        <div className="text-8xl my-4">{item.emoji}</div>
+                        <div className="text-4xl font-bold capitalize">{item.contoh}</div>
+                    </div>
+                    <div className="flex gap-4">
+                        <button onClick={() => setI(p => (p > 0 ? p - 1 : 25))} className="bg-gray-200 p-4 rounded-full"><ChevronLeft /></button>
+                        <button onClick={() => setI(p => (p + 1) % 26)} className="bg-rose-500 text-white p-4 rounded-full"><ChevronRight /></button>
+                    </div>
+                </div>
+            );
+        }
+
+        function SukuModule({ onBack, onStar }) {
+            const suku = ['ba', 'ca', 'da', 'fa', 'ga', 'ha', 'ja', 'ka', 'la', 'ma'];
+            return (
+                <div className="flex flex-col items-center gap-6">
+                    <button onClick={onBack} className="self-start"><ArrowLeft /></button>
+                    <div className="grid grid-cols-2 gap-4">
+                        {suku.map(s => (
+                            <button key={s} onClick={() => { playAudio(s); onStar(); }} className="bg-orange-500 text-white p-8 rounded-2xl text-4xl font-black">{s}</button>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
+
+```
